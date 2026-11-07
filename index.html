@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="hi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>जगमग दिवाली</title>
+<link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="strip l"></div><div class="strip r"></div>
+
+<section class="stage on" id="s1">
+  <div class="curt"><div class="cur l"></div><div class="cur r"></div></div>
+  <h2 class="shubh">शुभ<br>दीपावली</h2>
+  <div class="sign"><h1>जगमग<br>दिवाली</h1></div>
+  <p class="sub">रोशनी का त्योहार आ गया</p>
+  <button class="btn" data-next="s2">Tap to begin</button>
+</section>
+
+<section class="stage" id="s2">
+  <div class="dark"></div><div class="glow"></div>
+  <div class="niche"><span class="rose" style="left:14px">🌹</span><span class="rose" style="right:14px">🌹</span><div class="diya" id="diya"><div class="flame"></div></div></div>
+  <p class="hint" id="h2">Tap the diya to light it</p>
+</section>
+
+<section class="stage" id="s3">
+  <div class="hint2" id="h3">Double tap to light it</div>
+  <div id="rocket"><i class="cone"></i><i class="tube"></i><i class="stick"></i><i class="fuse"></i><span class="spark"></span></div>
+  <div class="card" id="c1">
+    <h2>शुभ दीपावली</h2>
+    <p>Who should we send this light to?</p>
+    <input id="nm" maxlength="24" placeholder="Their name" autocomplete="off"><input id="fr" maxlength="24" placeholder="Your name (optional)" autocomplete="off">
+    <div class="row"><button class="btn" id="mk">Make card + link</button></div>
+  </div>
+  <div class="card" id="c2">
+    <svg class="rg" viewBox="-50 -50 100 100"><path pathLength="1" d="M0 0C-12-18-8-36 0-46C8-36 12-18 0 0"/><path pathLength="1" d="M0 0C-12-18-8-36 0-46C8-36 12-18 0 0" transform="rotate(45)"/><path pathLength="1" d="M0 0C-12-18-8-36 0-46C8-36 12-18 0 0" transform="rotate(90)"/><path pathLength="1" d="M0 0C-12-18-8-36 0-46C8-36 12-18 0 0" transform="rotate(135)"/><path pathLength="1" d="M0 0C-12-18-8-36 0-46C8-36 12-18 0 0" transform="rotate(180)"/><path pathLength="1" d="M0 0C-12-18-8-36 0-46C8-36 12-18 0 0" transform="rotate(225)"/><path pathLength="1" d="M0 0C-12-18-8-36 0-46C8-36 12-18 0 0" transform="rotate(270)"/><path pathLength="1" d="M0 0C-12-18-8-36 0-46C8-36 12-18 0 0" transform="rotate(315)"/><circle pathLength="1" r="11"/><circle pathLength="1" r="48" style="stroke-dasharray:.01 .012"/></svg>
+    <h2 id="to">शुभ दीपावली</h2>
+    <div class="env" id="env"><i class="flap"></i><div class="seal">🪔</div><span>Tap to open your secret letter</span></div>
+    <div class="scr" id="scr"><p id="msg"></p><p id="by"></p></div>
+    <input id="wish" maxlength="40" placeholder="Whisper a wish for the sky">
+    <div class="row"><button class="btn" id="lan">Release lantern</button><button class="btn" id="shr">Share</button><button class="btn" id="boom">More fireworks</button></div>
+    <p class="cr">Made with ✨ by Storymint Studio · @storymint.studio</p>
+  </div>
+</section>
+<button class="mute" id="mt" title="Sound">🔊</button>
+
+<script>
+const $=id=>document.getElementById(id),cv=$('c'),x=cv.getContext('2d');
+let W,H,P=[],snd=true,AC;
+function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight}rs();addEventListener('resize',rs);
+const COL=['#ff3d6e','#ffc83d','#3dd6ff','#7dff6b','#ff7a1f','#c77dff','#ffffff'];
+function boom(px,py,big){
+  const c=COL[Math.random()*COL.length|0],c2=COL[Math.random()*COL.length|0],n=big?120:70,ring=Math.random()<.35,heart=Math.random()<.2;
+  for(let i=0;i<n;i++){let a=i/n*6.283,s=(big?6:4)*(ring||heart?1:.4+Math.random());
+    let vx=Math.cos(a)*s,vy=Math.sin(a)*s;
+    if(heart){const t=a;vx=16*Math.pow(Math.sin(t),3)*(big?.45:.3);vy=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))*(big?.45:.3)}
+    P.push({x:px,y:py,vx,vy,l:1,d:.011+Math.random()*.01,c:i%3?c:c2,g:.045,r:2.2})}
+  pop2(big)}
+function trail(px,py){P.push({x:px,y:py,vx:(Math.random()-.5)*1.2,vy:2+Math.random()*2,l:1,d:.04,c:'#ffb300',g:0,r:2.5})}
+function loop(){x.globalCompositeOperation='source-over';x.fillStyle='rgba(18,6,32,.22)';x.fillRect(0,0,W,H);x.globalCompositeOperation='lighter';
+  for(let i=P.length-1;i>=0;i--){const p=P[i];p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.vx*=.985;p.l-=p.d;if(p.l<=0){P.splice(i,1);continue}
+    x.globalAlpha=p.l;x.fillStyle=p.c;x.beginPath();x.arc(p.x,p.y,p.r*p.l+.4,0,6.3);x.fill()}
+  x.globalAlpha=1;requestAnimationFrame(loop)}loop();
+function shot(){boom(W*(.12+Math.random()*.76),H*(.1+Math.random()*.4),Math.random()<.4)}
+function pop2(big){if(!snd)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const n=AC.sampleRate*.35|0,b=AC.createBuffer(1,n,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);const s=AC.createBufferSource(),g=AC.createGain();g.gain.value=big?.5:.28;s.buffer=b;s.connect(g).connect(AC.destination);s.start()}catch(e){}}
+$('mt').onclick=()=>{snd=!snd;$('mt').textContent=snd?'🔊':'🔇'};
+
+let auto;function show(id){document.querySelectorAll('.stage').forEach(s=>s.classList.remove('on'));$(id).classList.add('on')}
+document.querySelector('[data-next]').onclick=()=>{show('s2');boom(W/2,H*.3,1)};
+
+let lit=false;$('diya').onclick=()=>{if(lit)return;lit=true;$('s2').classList.add('lit');$('h2').textContent='दीया जल उठा ✨';
+  setTimeout(()=>{$('h2').innerHTML='<button class="btn" id="nx">Now, the rocket</button>';$('nx').onclick=()=>{show('s3');$('s3').style.background='transparent'}},2200)};
+
+let last=0,fired=false;
+$('s3').addEventListener('pointerdown',e=>{
+  if(fired){if(!e.target.closest('.card,.btn,input'))boom(e.clientX,e.clientY,Math.random()<.5);return}
+  const t=Date.now();if(t-last<380){fire()}last=t});
+function fire(){fired=true;$('h3').remove();const r=$('rocket');r.classList.add('go');
+  const f=setInterval(()=>{const b=r.getBoundingClientRect();trail(b.left+30,b.bottom)},16);
+  setTimeout(()=>{r.style.transform=`translateY(-${H*.62}px)`},650);
+  setTimeout(()=>{clearInterval(f);const b=r.getBoundingClientRect();r.style.display='none';boom(b.left+30,b.top,1);setTimeout(()=>boom(W*.25,H*.25,1),250);setTimeout(()=>boom(W*.75,H*.3,1),500);
+    auto=setInterval(shot,650);setTimeout(()=>RC?card(RC.n,RC.f):$('c1').classList.add('on'),1800)},2300)}
+
+let LINK='',RC=null;
+function card(n,f){$('c1').classList.remove('on');$('env').style.display='';$('env').classList.remove('open');$('scr').classList.remove('on');$('by').textContent=f?'— '+f:'';
+  $('to').textContent=n?n+', शुभ दीपावली':'शुभ दीपावली';
+  const W2=['May your home glow brighter than a thousand diyas, your sky fill with colour, and every wish rise higher than the rockets. Happy Diwali!','Ghar mein roshni, dil mein khushi, aur zindagi mein meethe pal. Jagmag Diwali ho aapki!','Let every diya you light chase away one worry. May this year be bright, sweet and full of sparkle.','Laddoo meethe, patakhe zordaar, aur saal bhar ka pyaar. Happy Diwali!'];$('msg').textContent=(n?'Dear '+n+',\n':'')+W2[Math.random()*W2.length|0];
+  $('c2').classList.add('on');for(let i=0;i<5;i++)setTimeout(()=>boom(W*Math.random(),H*.3*Math.random()+40,1),i*180)}
+$('mk').onclick=()=>{const n=$('nm').value.trim(),f=$('fr').value.trim(),sl=s=>s.replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,''),h=sl(n)+(f&&sl(f)?'-from-'+sl(f):'');LINK=location.href.split('#')[0]+(sl(n)?'#'+h:'');card(n,f)};
+$('env').onclick=()=>{$('env').classList.add('open');setTimeout(()=>{$('env').style.display='none';$('scr').classList.add('on');boom(W/2,H*.2,1)},800)};
+(function(){const h=decodeURIComponent(location.hash.slice(1));if(!h)return;const p=h.split('-from-'),n=p[0].replace(/-/g,' ').trim(),f=(p[1]||'').replace(/-/g,' ').trim();if(!n)return;RC={n,f};LINK=location.href;document.querySelector('.sub').textContent=n+', this light is for you';})();
+$('lan').onclick=()=>{const t=$('wish').value.trim()||'Happy Diwali';const l=document.createElement('div');l.className='lantern';l.textContent=t;
+  l.style.left=(8+Math.random()*70)+'vw';l.style.setProperty('--dx',(Math.random()*80-40)+'px');document.body.appendChild(l);$('wish').value='';setTimeout(()=>l.remove(),11000)};
+$('boom').onclick=()=>{for(let i=0;i<6;i++)setTimeout(shot,i*150)};
+$('shr').onclick=async()=>{const n=$('nm').value.trim(),text=(n?n+', ':'')+'wishing you a जगमग Diwali! Light a diya and a rocket for you:',url=LINK||location.href.split('#')[0];
+  try{if(navigator.share)await navigator.share({title:'जगमग दिवाली',text,url});else{await navigator.clipboard.writeText(text+' '+url);$('shr').textContent='Link copied'}}catch(e){}};
+setTimeout(()=>$('s1').classList.add('open'),1000);
+</script></body></html>
